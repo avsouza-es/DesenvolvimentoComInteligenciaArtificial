@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conexão com Firebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .status-container {
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div id="status" class="status-container">
+        Verificando conexão com o Firebase...
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmpoZCmBJy7Du3ZbMXT2U2POZKt_2o74s",
+            authDomain: "controlefloricultura-82ef2.firebaseapp.com",
+            projectId: "controlefloricultura-82ef2",
+            storageBucket: "controlefloricultura-82ef2.firebasestorage.app",
+            messagingSenderId: "266097029966",
+            appId: "1:266097029966:web:1c906eb87e214e9619641f"
+        };
+
+        const statusElement = document.getElementById('status');
+
+        try {
+            // Tentativa de inicialização do Firebase
+            const app = initializeApp(firebaseConfig);
+            
+            // Atualiza o status se conectar com sucesso
+            statusElement.innerHTML = "Conexão com Firebase estabelecida com sucesso! ✅";
+            statusElement.classList.add('connected');
+            
+        } catch (error) {
+            // Atualiza o status em caso de erro
+            statusElement.innerHTML = `Falha na conexão com o Firebase: <br>${error.message} ❌`;
+            statusElement.classList.add('error');
+        }
+    </script>
+</body>
+</html>

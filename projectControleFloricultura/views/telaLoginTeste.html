@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.24.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.24.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.24.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <h2 class="text-center">Login</h2>
+                <form id="loginForm" method="POST">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <div id="status" class="text-danger"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      // Your Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyAmpoZCmBJy7Du3ZbMXT2U2POZKt_2o74s",
+        authDomain: "controlefloricultura-82ef2.firebaseapp.com",
+        projectId: "controlefloricultura-82ef2",
+        storageBucket: "controlefloricultura-82ef2.firebasestorage.app",
+        messagingSenderId: "266097029966",
+        appId: "1:266097029966:web:1c906eb87e214e9619641f"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      const loginForm = document.getElementById('loginForm');
+      const statusDiv = document.getElementById('status');
+
+      // Check if user is already signed in
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          window.location.href = 'telaPrincipal.html';
+        }
+      });
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+          const userCredential = await auth.signInWithEmailAndPassword(username, password);
+          statusDiv.textContent = "Login successful!";
+
+          // Access Firestore data (example: get user profile)
+          const userRef = db.collection('users').doc(userCredential.user.uid);
+          const userDoc = await userRef.get();
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            console.log("User data:", userData);
+            // Use userData to personalize the app
+          } else {
+            console.log("No user data found.");
+          }
+
+          // Redirect to telaPrincipal.html
+          window.location.href = 'telaPrincipal.html';
+
+        } catch (error) {
+          statusDiv.textContent = `Login failed: ${error.message}`;
+          console.error(error);
+        }
+      });
+    </script>
+</body>
+</html>

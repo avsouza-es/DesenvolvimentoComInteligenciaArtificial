@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Controle Floricultura</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .status-message {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Acesso ao Sistema</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="text" id="username" placeholder="Usuário" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="password" placeholder="Senha" required>
+            </div>
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmpoZCmBJy7Du3ZbMXT2U2POZKt_2o74s",
+            authDomain: "controlefloricultura-82ef2.firebaseapp.com",
+            projectId: "controlefloricultura-82ef2",
+            storageBucket: "controlefloricultura-82ef2.firebasestorage.app",
+            messagingSenderId: "266097029966",
+            appId: "1:266097029966:web:1c906eb87e214e9619641f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const loginForm = document.getElementById('loginForm');
+        const statusMessage = document.getElementById('statusMessage');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const usersRef = collection(db, 'usuariosSistema');
+                const q = query(usersRef, 
+                    where('nomeUsuario', '==', username),
+                    where('senhaUsuario', '==', password)
+                );
+
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    showMessage('Login realizado com sucesso!', 'success');
+                    // Redirecionar ou executar ações após login
+                } else {
+                    showMessage('Usuário ou senha incorretos', 'error');
+                }
+            } catch (error) {
+                showMessage(`Erro ao conectar: ${error.message}`, 'error');
+            }
+        });
+
+        function showMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+        }
+    </script>
+</body>
+</html>
