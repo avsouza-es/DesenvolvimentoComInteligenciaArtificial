@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastrar OS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body class="container mt-5">
+  <div class="form-container">
+    <h2>Cadastro de OS</h2>
+    <form id="formOS">
+      <div class="mb-3">
+        <label for="numeroOS" class="form-label">Número da OS</label>
+        <input type="text" class="form-control" id="numeroOS" required>
+      </div>
+      <div class="mb-3">
+        <label for="dataRegistro" class="form-label">Data de Registro</label>
+        <input type="date" class="form-control" id="dataRegistro" required>
+      </div>
+      <div class="mb-3">
+        <label for="unidade" class="form-label">Unidade</label>
+        <input type="text" class="form-control" id="unidade" required>
+      </div>
+      <div class="mb-3">
+        <label for="localidade" class="form-label">Localidade</label>
+        <select class="form-select" id="localidade" required>
+          <option value="Vila Valério">Vila Valério</option>
+          <option value="São Gabriel da Palha">São Gabriel da Palha</option>
+          <option value="Pancas">Pancas</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="executar" class="form-label">Tipo de Executor</label>
+        <select class="form-select" id="executar" required>
+          <option value="eletromecanica">Eletromecânica</option>
+          <option value="automação">Automação</option>
+          <option value="pitometria">Pitometria</option>
+          <option value="veiculos">Veículos</option>
+          <option value="servicos-gerais">Serviços Gerais</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="descricao" class="form-label">Descrição do Serviço</label>
+        <textarea type="text" class="form-control" id="descricao" rows="4" maxlength="500" placeholder="Descreva o serviço a ser executado"></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="status" class="form-label">Status</label>
+        <select class="form-select" id="status" required>
+          <option value="Aberto">Aberto</option>
+          <option value="Executado">Executado</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="dataExecucao" class="form-label">Data de Execução</label>
+        <input type="date" class="form-control" id="dataExecucao">
+      </div>
+      <div class="btn-group">
+        <a href="index.html" class="btn btn-secondary">Principal</a>
+        <button type="button" class="btn btn-danger" onclick="limparCampos()">Limpar</button>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Firebase e Firestore -->
+  <script type="module">
+    // Importar Firebase e Firestore
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCG97DhSp94xoTY7BcoocCbKWU9rSS7Ls0",
+      authDomain: "controleoscesan.firebaseapp.com",
+      projectId: "controleoscesan",
+      storageBucket: "controleoscesan.firebasestorage.app",
+      messagingSenderId: "236024588182",
+      appId: "1:236024588182:web:04173f787d674c7d7c1fb7",
+      measurementId: "G-S2M49GE0CC"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); // Inicializar Firestore
+
+    // Função para salvar a OS no Firestore
+    document.getElementById('formOS').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const os = {
+        numero: document.getElementById('numeroOS').value,
+        dataRegistro: document.getElementById('dataRegistro').value,
+        unidade: document.getElementById('unidade').value,
+        localidade: document.getElementById('localidade').value,
+        executar: document.getElementById('executar').value,
+        descricao: document.getElementById('descricao').value,
+        status: document.getElementById('status').value,
+        dataExecucao: document.getElementById('dataExecucao').value || null,
+      };
+
+      try {
+        // Adicionar OS ao Firestore
+        await addDoc(collection(db, 'os'), os);
+        alert('OS salva com sucesso no Firestore!');
+        limparCampos(); // Limpa os campos após salvar
+      } catch (error) {
+        console.error('Erro ao salvar OS: ', error);
+        alert('Erro ao salvar OS. Tente novamente.');
+      }
+    });
+
+    // Função para carregar os dados da OS ao editar
+    async function carregarDadosOS() {
+      const numeroOS = new URLSearchParams(window.location.search).get('numero');
+      if (!numeroOS) return; // Se não houver número na URL, não faz nada
+
+      try {
+        // Buscar a OS no Firestore
+        const querySnapshot = await getDocs(collection(db, 'os'));
+        querySnapshot.forEach((doc) => {
+          const os = doc.data();
+          if (os.numero === numeroOS) {
+            // Preenche os campos do formulário com os dados da OS
+            document.getElementById('numeroOS').value = os.numero;
+            document.getElementById('dataRegistro').value = os.dataRegistro;
+            document.getElementById('unidade').value = os.unidade;
+            document.getElementById('localidade').value = os.localidade;
+            document.getElementById('executar').value = os.executar;
+            document.getElementById('descricao').value = os.descricao || '';
+            document.getElementById('status').value = os.status;
+            document.getElementById('dataExecucao').value = os.dataExecucao || '';
+          }
+        });
+      } catch (error) {
+        console.error('Erro ao carregar OS: ', error);
+      }
+    }
+
+    // Função para limpar os campos
+    function limparCampos() {
+      document.getElementById('formOS').reset();
+      document.getElementById('status').value = 'Aberto'; // Define o status como "Aberto" ao limpar
+    }
+
+    // Carrega os dados da OS ao abrir a página
+    carregarDadosOS();
+  </script>
+</body>
+</html>

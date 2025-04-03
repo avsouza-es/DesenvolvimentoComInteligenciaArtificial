@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visualizar OS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .table-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .table tbody tr:nth-child(odd) {
+      background-color: #f9f9f9; /* Cor de fundo para linhas ímpares */
+    }
+    .table tbody tr:nth-child(even) {
+      background-color: #e9ecef; /* Cor de fundo para linhas pares */
+    }
+    .table tbody tr:hover {
+      background-color: #d1e7fd; /* Cor de fundo ao passar o mouse */
+    }
+    .btn-group {
+      display: flex;
+      gap: 5px;
+    }
+    .btn-principal {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Cabeçalho -->
+  <div class="header">
+    <h1>Visualizar OS</h1>
+    <a href="index.html" class="btn btn-secondary">PRINCIPAL</a>
+  </div>
+
+  <!-- Tabela de OSs -->
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Número OS</th>
+          <th>Data Registro</th>
+          <th>Unidade</th>
+          <th>Localidade</th>
+          <th>Executor</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="osTableBody">
+        <!-- As OSs serão carregadas aqui -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Firebase e Firestore -->
+  <script type="module">
+    // Importar Firebase e Firestore
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCG97DhSp94xoTY7BcoocCbKWU9rSS7Ls0",
+      authDomain: "controleoscesan.firebaseapp.com",
+      projectId: "controleoscesan",
+      storageBucket: "controleoscesan.firebasestorage.app",
+      messagingSenderId: "236024588182",
+      appId: "1:236024588182:web:04173f787d674c7d7c1fb7",
+      measurementId: "G-S2M49GE0CC"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); // Inicializar Firestore
+
+    // Função para carregar as OSs do Firestore
+    async function carregarOSs() {
+      const tbody = document.getElementById('osTableBody');
+      tbody.innerHTML = ''; // Limpa a tabela
+
+      try {
+        // Buscar todas as OSs no Firestore
+        const querySnapshot = await getDocs(collection(db, 'os'));
+        querySnapshot.forEach((doc) => {
+          const os = doc.data();
+          const osId = doc.id; // ID da OS no Firestore
+
+          // Adiciona a OS na tabela
+          tbody.innerHTML += `
+            <tr>
+              <td>${os.numero}</td>
+              <td>${os.dataRegistro}</td>
+              <td>${os.unidade}</td>
+              <td>${os.localidade}</td>
+              <td>${os.executar}</td>
+              <td>${os.status}</td>
+              <td>
+                <div class="btn-group">
+                  <a href="cadastrarOS.html?numero=${os.numero}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-pencil"></i> Editar
+                  </a>
+                  <button onclick="excluirOS('${osId}')" class="btn btn-danger btn-sm">
+                    <i class="bi bi-trash"></i> Excluir
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+      } catch (error) {
+        console.error('Erro ao carregar OSs: ', error);
+        alert('Erro ao carregar OSs. Tente novamente.');
+      }
+    }
+
+    // Função para excluir uma OS
+    window.excluirOS = async function (osId) {
+      if (confirm('Tem certeza que deseja excluir esta OS?')) {
+        try {
+          await deleteDoc(doc(db, 'os', osId)); // Exclui a OS do Firestore
+          alert('OS excluída com sucesso!');
+          carregarOSs(); // Recarrega a tabela após exclusão
+        } catch (error) {
+          console.error('Erro ao excluir OS: ', error);
+          alert('Erro ao excluir OS. Tente novamente.');
+        }
+      }
+    };
+
+    // Carrega as OSs ao abrir a página
+    carregarOSs();
+  </script>
+</body>
+</html>
